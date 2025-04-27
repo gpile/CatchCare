@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: trap-iot-service
+
+  threads:
+    virtual:
+      enabled: true # Enable virtual threads for the application
+
+  output:
+    ansi:
+      enabled: always # Enable ANSI colors in the console output
+
+#  data:
+#    mongodb:
+#      host: localhost
+#      port: 27017
+#      database: catchcare-iot
+
+mqtt:
+  url: tcp://localhost:1883
+  client-id: trap-iot-client
+  inbound-topics:
+    catchcare/trap/status      # i.e. trap activated, trap closed
+  outbound-topics:
+    catchcare/trap/command     # i.e. take-photo
+
+logging:
+  level:
+    root: INFO
+#    org.springframework.integration: DEBUG
+
+server:
+  port: 8081
