@@ -70,10 +70,7 @@ public class MqttConfig {
 
         return message -> {
             String payload = (String) message.getPayload();
-//            System.out.println("Received via MQTT: " + payload);
             trapEventService.processEvent(payload);
-
-            // TODO qui puoi usare TrapEventParser.parse(payload)
         };
 
     }
