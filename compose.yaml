@@ -17,16 +17,17 @@ services:
     container_name: kafka-broker
     restart: always
     ports:
-      - "9092:9092"
+      - "9094:9094" # External docker network listener port (e.g. used for development)
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       # Need to use container name "kafka-broker" as the hostname for the kafka-broker-init to work properly,
       # using docker-compose internal network dns
-      KAFKA_LISTENERS: PLAINTEXT://kafka-broker:9092,CONTROLLER://kafka-broker:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker:9092
+      # EXTERNAL listener required for connections outside the Docker network (e.g. for development purposes)
+      KAFKA_LISTENERS: PLAINTEXT://kafka-broker:9092,CONTROLLER://kafka-broker:9093,EXTERNAL://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker:9092,EXTERNAL://host.docker.internal:9094
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-broker:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
