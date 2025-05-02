@@ -1,6 +1,6 @@
 package it.catchcare.trapiot.util;
 
-import it.catchcare.trapiot.domain.*;
+import it.catchcare.common.domain.*;
 
 import java.time.Instant;
 

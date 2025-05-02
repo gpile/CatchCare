@@ -10,6 +10,12 @@ spring:
     ansi:
       enabled: always # Enable ANSI colors in the console output
 
+  kafka:
+    bootstrap-servers: localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
 #  data:
 #    mongodb:
 #      host: localhost
@@ -20,9 +26,9 @@ mqtt:
   url: tcp://localhost:1883
   client-id: trap-iot-client
   inbound-topics:
-    catchcare/trap/status      # i.e. trap activated, trap closed
+    catchcare/trap/status      # e.g. trap activated, trap closed
   outbound-topics:
-    catchcare/trap/command     # i.e. take-photo
+    catchcare/trap/command     # e.g. take-photo
 
 logging:
   level:

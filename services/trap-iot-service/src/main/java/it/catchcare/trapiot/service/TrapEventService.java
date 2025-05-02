@@ -9,9 +9,15 @@ import org.springframework.stereotype.Service;
 @Log
 public class TrapEventService {
 
+    private final TrapKafkaProducer trapKafkaProducer;
+
+    public TrapEventService(TrapKafkaProducer trapKafkaProducer) {
+        this.trapKafkaProducer = trapKafkaProducer;
+    }
+
     @Async
     /**
-     * Processes the trap event payload asynchronously.
+     * Processes the MQTT trap event payload asynchronously.
      * This method is annotated with @Async to allow for non-blocking execution.
      *
      * It uses virtual threads for better resource utilization, thanks to the Spring Executor provided by default
@@ -26,6 +32,7 @@ public class TrapEventService {
      */
     public void processEvent(String payload) {
         log.info("Processing payload on thread [" + Thread.currentThread() + "] with payload: " + payload);
+        trapKafkaProducer.sendEvent("trap-events", payload);
     }
 
 }

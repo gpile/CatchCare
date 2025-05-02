@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>it.catchcare</groupId>
+	<artifactId>catchcare-parent</artifactId>
+	<version>1.0.0</version>
+	<name>CatchCare</name>
+	<description>Parent pom for CatchCare modules</description>
+	<packaging>pom</packaging>
+
+	<url>https://github.com/gpile/CatchCare</url>
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>https://mit-license.org/</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<name>Giuseppe Pilè</name>
+			<email>pile.giuseppe@gmail.com</email>
+		</developer>
+	</developers>
+	<scm>
+		<url>https://github.com/gpile/CatchCare</url>
+	</scm>
+
+	<modules>
+		<module>services/catchcare-common</module>
+		<module>services/trap-iot-service</module>
+<!--		<module>trap-service</module>-->
+<!--		<module>volunteer-service</module>-->
+<!--		<module>trap-api-service</module>-->
+	</modules>
+
+	<properties>
+		<java.version>21</java.version>
+		<spring-boot.version>3.2.5</spring-boot.version>
+		<catchcare-common.version>1.0.0</catchcare-common.version>
+		<!-- from spring-boot-starter-parent -->
+		<maven.compiler.release>${java.version}</maven.compiler.release>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>it.catchcare</groupId>
+				<artifactId>catchcare-common</artifactId>
+				<version>${catchcare-common.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+</project>

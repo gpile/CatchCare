@@ -1,10 +1,10 @@
-package it.catchcare.trapiot.domain;
+package it.catchcare.common.domain;
 
 import java.time.Instant;
 
-public record TrapClosedEvent(String trapId, Instant timestamp) implements TrapEvent {
+public record TrapArmedEvent(String trapId, Instant timestamp) implements TrapEvent {
     // Record constructor to validate the parameters
-    public TrapClosedEvent {
+    public TrapArmedEvent {
         if (trapId == null || trapId.isBlank()) {
             throw new IllegalArgumentException("trapId cannot be null or blank");
         }
