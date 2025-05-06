@@ -77,7 +77,7 @@
 				<executions>
 					<execution>
 						<goals>
-							<!-- goal required to apply the parent Spring configuration for the Java version -->
+							<!-- goal required to apply the parent Spring configuration to generate an executable jar -->
 							<goal>repackage</goal>
 						</goals>
 					</execution>
