@@ -1,4 +1,5 @@
 services:
+
   # MQTT broker
   mosquitto:
     image: eclipse-mosquitto:2
@@ -11,6 +12,7 @@ services:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
+
   # Apache Kafka broker
   kafka-broker:
     image: apache/kafka:latest
@@ -34,9 +36,11 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_NUM_PARTITIONS: 3
+
   # Service to initialize Kafka topics
   kafka-broker-init:
     image: apache/kafka:latest
+    container_name: kafka-broker-init
     restart: no
     depends_on:
       - kafka-broker
@@ -44,3 +48,23 @@ services:
       - ./kafka/init-kafka.sh:/init-kafka.sh
     entrypoint: [ "/bin/sh", "-c" ]
     command: "/init-kafka.sh"
+
+  # trap-iot-service
+  trap-iot-service:
+    build:
+      context: .
+      dockerfile: services/trap-iot-service/Dockerfile
+    container_name: trap-iot-service
+#    ports:
+#      - "8080:8080"
+    environment:
+        # Mosquitto hostname on Docker network
+        MQTT_BROKER_HOST: mosquitto
+        MQTT_BROKER_PORT: 1883
+        # Kafka hostname on network Docker
+        KAFKA_BROKER_HOST: kafka-broker
+        KAFKA_BROKER_PORT: 9092
+#      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - kafka-broker
+      - mosquitto

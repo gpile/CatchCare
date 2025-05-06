@@ -11,7 +11,7 @@ spring:
       enabled: always # Enable ANSI colors in the console output
 
   kafka:
-    bootstrap-servers: localhost:9094
+    bootstrap-servers: ${KAFKA_BROKER_HOST:localhost}:${KAFKA_BROKER_PORT:9094}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -23,7 +23,7 @@ spring:
 #      database: catchcare-iot
 
 mqtt:
-  url: tcp://localhost:1883
+  url: tcp://${MQTT_BROKER_HOST:localhost}:${MQTT_BROKER_PORT:1883}
   client-id: trap-iot-client
   inbound-topics:
     catchcare/trap/status      # e.g. trap activated, trap closed
