@@ -7,8 +7,7 @@ WORKDIR /build
 # Copy the parent pom.xml and the project files to the container
 # context is set to the root of the project in docker compose
 COPY pom.xml .
-COPY services/catchcare-common ./services/catchcare-common
-COPY services/trap-iot-service ./services/trap-iot-service
+COPY services/ ./services/
 
 # Build the application using Maven
 RUN mvn clean package clean package -pl services/trap-iot-service -am -DskipTests
@@ -21,5 +20,3 @@ WORKDIR /app
 COPY --from=build /build/services/trap-iot-service/target/*.jar service.jar
 # Set the command to run the application
 CMD ["java", "-jar", "/app/service.jar"]
-
-#EXPOSE 8081

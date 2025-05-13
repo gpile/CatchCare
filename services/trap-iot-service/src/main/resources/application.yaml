@@ -1,6 +1,8 @@
 spring:
   application:
     name: trap-iot-service
+#  server:
+#    port: 8080
 
   threads:
     virtual:
@@ -15,12 +17,6 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-
-#  data:
-#    mongodb:
-#      host: localhost
-#      port: 27017
-#      database: catchcare-iot
 
 mqtt:
   url: tcp://${MQTT_BROKER_HOST:localhost}:${MQTT_BROKER_PORT:1883}
