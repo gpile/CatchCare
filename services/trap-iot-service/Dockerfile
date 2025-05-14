@@ -10,7 +10,7 @@ COPY pom.xml .
 COPY services/ ./services/
 
 # Build the application using Maven
-RUN mvn clean package clean package -pl services/trap-iot-service -am -DskipTests
+RUN mvn clean package -pl services/trap-iot-service -am -DskipTests
 
 # Use an official OpenJDK image as the base image
 FROM eclipse-temurin:21
