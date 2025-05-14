@@ -1,6 +1,8 @@
 package it.catchcare.trapiot.util;
 
-import it.catchcare.common.domain.*;
+import it.catchcare.common.domain.TrapArmedEvent;
+import it.catchcare.common.domain.TrapClosedEvent;
+import it.catchcare.common.domain.TrapEvent;
 
 import java.time.Instant;
 
