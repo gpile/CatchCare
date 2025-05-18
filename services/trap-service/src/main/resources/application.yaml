@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: trap-service
+
+  threads:
+    virtual:
+      enabled: true # Enable virtual threads for the application
+
+  output:
+    ansi:
+      enabled: always # Enable ANSI colors in the console output
+
+  config:
+    import: optional:configtree:secrets/ # Load secrets from the local file system. This must be optional due to
+    # Spring's configuration load order (application.yaml, then application-profile.yaml), to avoid errors when
+    # running with the Docker profile that could prevent the application from starting.
+    # The correct application-docker.yaml configuration will then be loaded.
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKER_HOST:localhost}:${KAFKA_BROKER_PORT:9094}
+    consumer:
+      group-id: trap-service # consumer group, useful for multiple instances of the same service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+  data:
+    mongodb:
+      host: ${MONGODB_HOST:localhost}
+      port: ${MONGODB_PORT:27017}
+      database: catchcare
+      username: ${mongodb_user_username}
+      password: ${mongodb_user_password}
+
+mqtt:
+  url: tcp://${MQTT_BROKER_HOST:localhost}:${MQTT_BROKER_PORT:1883}
+  client-id: trap-iot-client
+  inbound-topics:
+    catchcare/trap/status      # e.g. trap activated, trap closed
+  outbound-topics:
+    catchcare/trap/command     # e.g. take-photo
+
+logging:
+  level:
+    root: INFO
+#    org.springframework.integration: DEBUG
+    it.catchcare.trap.kafka: DEBUG
+
+server:
+  port: 8081

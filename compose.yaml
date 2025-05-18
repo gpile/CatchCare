@@ -88,6 +88,30 @@ services:
       - kafka-broker
       - mosquitto
 
+  # trap-service
+  trap-service:
+    build:
+      context: .
+      dockerfile: services/trap-service/Dockerfile
+    container_name: trap-service
+    ports:
+      - "8081:8081"
+    environment:
+      # Kafka hostname on network Docker
+      KAFKA_BROKER_HOST: kafka-broker
+      KAFKA_BROKER_PORT: 9092
+      # MongoDB hostname on Docker network
+      MONGODB_HOST: mongodb
+      MONGODB_PORT: 27017
+      # Spring profile
+      SPRING_PROFILES_ACTIVE: docker
+    secrets:
+      - mongodb_user_username
+      - mongodb_user_password
+    depends_on:
+      - kafka-broker
+      - mongodb
+
 volumes:
   mongo-data:
 

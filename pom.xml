@@ -30,7 +30,7 @@
 	<modules>
 		<module>services/catchcare-common</module>
 		<module>services/trap-iot-service</module>
-<!--		<module>trap-service</module>-->
+		<module>services/trap-service</module>
 <!--		<module>volunteer-service</module>-->
 <!--		<module>trap-api-service</module>-->
 	</modules>
@@ -38,7 +38,9 @@
 	<properties>
 		<java.version>21</java.version>
 		<spring-boot.version>3.2.5</spring-boot.version>
+		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 		<catchcare-common.version>1.0.0</catchcare-common.version>
+
 		<!-- from spring-boot-starter-parent -->
 		<maven.compiler.release>${java.version}</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -55,11 +57,64 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.mapstruct</groupId>
+				<artifactId>mapstruct</artifactId>
+				<version>${org.mapstruct.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mapstruct</groupId>
+				<artifactId>mapstruct-processor</artifactId>
+				<version>${org.mapstruct.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>it.catchcare</groupId>
 				<artifactId>catchcare-common</artifactId>
 				<version>${catchcare-common.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<annotationProcessorPaths> <!-- enable annotation processing -->
+							<path>
+								<groupId>org.projectlombok</groupId>
+								<artifactId>lombok</artifactId>
+							</path>
+							<path>
+								<groupId>org.mapstruct</groupId>
+								<artifactId>mapstruct-processor</artifactId>
+							</path>
+						</annotationProcessorPaths>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<executions>
+						<execution>
+							<goals>
+								<!-- goal required to apply the parent Spring configuration to generate an executable jar -->
+								<goal>repackage</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<excludes>
+							<exclude>
+								<groupId>org.projectlombok</groupId>
+								<artifactId>lombok</artifactId>
+							</exclude>
+						</excludes>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 
 </project>

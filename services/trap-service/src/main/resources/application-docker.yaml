@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: trap-service-docker
+  config:
+    import: configtree:/run/secrets/ # Load secrets from Docker
