@@ -49,14 +49,32 @@ services:
     entrypoint: [ "/bin/sh", "-c" ]
     command: "/init-kafka.sh"
 
+  # MongoDB
+  mongodb:
+    image: mongodb/mongodb-community-server:8.0-ubi8
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGODB_INITDB_ROOT_USERNAME_FILE: /run/secrets/mongodb_root_username
+      MONGODB_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongodb_root_password
+    volumes:
+      - mongo-data:/data/db
+      # Mount the initialization scripts which creates catchcare database and user
+      - ./mongodb/docker:/docker-entrypoint-initdb.d:ro
+    secrets:
+      - mongodb_root_username
+      - mongodb_root_password
+      - mongodb_user_username
+      - mongodb_user_password
+
   # trap-iot-service
   trap-iot-service:
     build:
       context: .
       dockerfile: services/trap-iot-service/Dockerfile
     container_name: trap-iot-service
-#    ports:
-#      - "8080:8080"
     environment:
         # Mosquitto hostname on Docker network
         MQTT_BROKER_HOST: mosquitto
@@ -64,7 +82,21 @@ services:
         # Kafka hostname on network Docker
         KAFKA_BROKER_HOST: kafka-broker
         KAFKA_BROKER_PORT: 9092
-#      SPRING_PROFILES_ACTIVE: docker
+        # Spring profile
+        SPRING_PROFILES_ACTIVE: docker
     depends_on:
       - kafka-broker
       - mosquitto
+
+volumes:
+  mongo-data:
+
+secrets:
+  mongodb_root_username:
+    file: secrets/mongodb_root_username
+  mongodb_root_password:
+    file: secrets/mongodb_root_password
+  mongodb_user_username:
+    file: secrets/mongodb_user_username
+  mongodb_user_password:
+    file: secrets/mongodb_user_password
