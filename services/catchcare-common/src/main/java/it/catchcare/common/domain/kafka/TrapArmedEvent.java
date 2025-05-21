@@ -1,4 +1,4 @@
-package it.catchcare.common.domain;
+package it.catchcare.common.domain.kafka;
 
 import java.time.Instant;
 
