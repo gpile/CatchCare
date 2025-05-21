@@ -1,8 +1,11 @@
 package it.catchcare.trap.model;
 
+import it.catchcare.trap.util.TrapStatus;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.Instant;
 
 @Document(collection = "traps")
 @Getter
@@ -13,7 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Trap {
     @Id
     private String id;
-    private String status;
+    private TrapStatus status;
     private String location;
-    private String lastUpdated;
+    private Instant lastUpdated;
 }
