@@ -1,18 +1,28 @@
 package it.catchcare.trapiot.service;
 
-import lombok.extern.java.Log;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import it.catchcare.common.domain.kafka.TrapArmedEvent;
+import it.catchcare.common.domain.kafka.TrapClosedEvent;
+import it.catchcare.common.domain.mqtt.TrapMqttMessage;
+import it.catchcare.common.domain.mqtt.TrapStatusMqttMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 
 @Service
-@Log
+@Slf4j
 public class TrapEventService {
 
     private final TrapKafkaProducer trapKafkaProducer;
+    private final ObjectMapper objectMapper;
 
-    public TrapEventService(TrapKafkaProducer trapKafkaProducer) {
+    public TrapEventService(TrapKafkaProducer trapKafkaProducer, ObjectMapper objectMapper) {
         this.trapKafkaProducer = trapKafkaProducer;
+        this.objectMapper = objectMapper;
     }
 
     @Async
@@ -32,7 +42,29 @@ public class TrapEventService {
      */
     public void processEvent(String payload) {
         log.info("Processing payload on thread [" + Thread.currentThread() + "] with payload: " + payload);
-        trapKafkaProducer.sendEvent("trap-events", payload);
+
+        try {
+            // Deserialize the payload into a TrapMqttMessage object
+            TrapMqttMessage message = objectMapper.readValue(payload, TrapMqttMessage.class);
+
+            switch(message) { // pattern matching for switch
+
+                case TrapStatusMqttMessage statusMessage -> {
+                    // trap status changed
+                    log.info("Trap status changed: {}", statusMessage);
+                    if (statusMessage.closed())
+                        trapKafkaProducer.sendEvent("trap-events", objectMapper.writeValueAsString(new TrapClosedEvent(statusMessage.trapId(), Instant.now())));
+                    else
+                        trapKafkaProducer.sendEvent("trap-events", objectMapper.writeValueAsString(new TrapArmedEvent(statusMessage.trapId(), Instant.now())));
+                }
+
+                default -> log.warn("Unknown message type: {}", message.getClass());
+            }
+
+        } catch (JsonProcessingException e) {
+            log.error("Error deserializing payload: {}", e.getMessage());
+        }
+
     }
 
 }
