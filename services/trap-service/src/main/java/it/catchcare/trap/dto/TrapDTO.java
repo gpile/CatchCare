@@ -11,7 +11,9 @@ import lombok.Setter;
 @Setter
 public class TrapDTO {
     private String id;
-    private String location;
+    private String name;
     private String status;
+    private Integer battery;
+    private String location;
     private String lastUpdated;
 }
