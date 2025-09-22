@@ -13,7 +13,7 @@ COPY services/ ./services/
 RUN mvn clean package -pl services/trap-iot-service -am -DskipTests
 
 # Use an official OpenJDK image as the base image
-FROM eclipse-temurin:21
+FROM eclipse-temurin:21-jre
 # Set the working directory in the container
 WORKDIR /app
 # Copy the built JAR file from the previous stage to the container
