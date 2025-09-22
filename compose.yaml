@@ -18,8 +18,9 @@ services:
     image: apache/kafka:latest
     container_name: kafka-broker
     restart: always
-    ports:
-      - "9094:9094" # External docker network listener port (e.g. used for development)
+    # Enable port mapping for external access (e.g. for development purposes)
+    #ports:
+    #  - "9094:9094"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -54,20 +55,119 @@ services:
     image: mongodb/mongodb-community-server:8.0-ubi8
     container_name: mongodb
     restart: always
-    ports:
-      - "27017:27017"
+    # Enable port mapping for external access (e.g. for development purposes)
+    #ports:
+    #  - "27017:27017"
     environment:
-      MONGODB_INITDB_ROOT_USERNAME_FILE: /run/secrets/mongodb_root_username
+      MONGODB_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGODB_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongodb_root_password
+      MONGO_USER: ${MONGO_USER_USERNAME}
     volumes:
       - mongo-data:/data/db
       # Mount the initialization scripts which creates catchcare database and user
       - ./mongodb/docker:/docker-entrypoint-initdb.d:ro
     secrets:
-      - mongodb_root_username
       - mongodb_root_password
-      - mongodb_user_username
       - mongodb_user_password
+
+  # Keycloak
+  # quay.io image does not support environment variables as files for sensitive data (e.g. database password stored
+  # as a Docker secret), so we build our own image based on the official one with a custom entrypoint script to handle
+  # this. See Dockerfile in the keycloak folder.
+  keycloak:
+#    image: quay.io/keycloak/keycloak:latest
+    build: ./keycloak
+    container_name: keycloak
+    restart: always
+    # Enable port mapping for external access (e.g. for development purposes)
+    #ports:
+    #  - "8080:8080" # Port for direct access (e.g. for development purposes)
+    environment:
+      # Database connection
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD_FILE: /run/secrets/keycloak_db_password
+      # Keycloak configuration
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD_FILE: /run/secrets/keycloak_admin_password
+      # Keycloak hostname and proxy settings
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME: auth.${DUCKDNS_DOMAIN} # TODO find a better way to set the hostname dynamically
+      KC_PROXY: edge
+      KC_PROXY_HEADERS: xforwarded
+    depends_on:
+      - keycloak-db
+    secrets:
+      - keycloak_db_password
+      - keycloak_admin_password
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=Host(`auth.${DUCKDNS_DOMAIN}`)" # Change with your domain
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
+      - "traefik.http.routers.keycloak.tls.certresolver=le"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+
+  # Keycloak postgres database
+  keycloak-db:
+    image: postgres:latest
+    container_name: keycloak-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${KEYCLOAK_DB_USER}
+      POSTGRES_PASSWORD_FILE: /run/secrets/keycloak_db_password
+      POSTGRES_DB: keycloak
+    secrets:
+      - keycloak_db_password
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+
+  # Traefik
+  traefik:
+    image: traefik:v3.5
+    container_name: traefik
+    restart: always
+    command:
+      # Provider Docker
+      - "--providers.docker=true"
+      # EntryPoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Redirect HTTP -> HTTPS
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      # Automatic Let's Encrypt certificates
+      - "--certificatesresolvers.le.acme.httpchallenge=true"
+      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.le.acme.email=tuo@email.com"
+      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+      # Secure Dashboard (no access on port 8080)
+      - "--api.dashboard=true" # enable the dashboard
+      - "--api.insecure=false" # no insecure access on port 8080
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/letsencrypt:/letsencrypt
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)" # Access the dashboard at traefik.localhost
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls.certresolver=le"
+      - "traefik.http.routers.traefik.service=api@internal"
+
+      # Router: when the requested host is catchcare.localhost
+      # TODO find a better way
+      - "traefik.http.routers.catchcare.rule=Host(`catchcare.localhost`)"
+      - "traefik.http.routers.catchcare.entrypoints=websecure"
+      - "traefik.http.routers.catchcare.tls.certresolver=le"
+
+      # TODO remove in production, only for development purposes
+      # Service: forward requests to the frontend dev server (VITE) running on the host machine at port
+      - "traefik.http.services.catchcare.loadbalancer.server.url=http://host.docker.internal:5173"
 
   # trap-iot-service
   trap-iot-service:
@@ -75,6 +175,7 @@ services:
       context: .
       dockerfile: services/trap-iot-service/Dockerfile
     container_name: trap-iot-service
+    restart: always
     environment:
         # Mosquitto hostname on Docker network
         MQTT_BROKER_HOST: mosquitto
@@ -94,6 +195,7 @@ services:
       context: .
       dockerfile: services/trap-service/Dockerfile
     container_name: trap-service
+    restart: always
     ports:
       - "8081:8081"
     environment:
@@ -106,21 +208,28 @@ services:
       # Spring profile
       SPRING_PROFILES_ACTIVE: docker
     secrets:
-      - mongodb_user_username
       - mongodb_user_password
     depends_on:
       - kafka-broker
       - mongodb
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.trap-service-api.rule=PathPrefix(`/api/traps`)" # Path-based routing
+      - "traefik.http.routers.trap-service-api.entrypoints=websecure"
+      - "traefik.http.routers.trap-service-api.tls.certresolver=le"
 
 volumes:
   mongo-data:
+  keycloak-db-data:
 
 secrets:
-  mongodb_root_username:
-    file: secrets/mongodb_root_username
+  # MongoDB secrets
   mongodb_root_password:
     file: secrets/mongodb_root_password
-  mongodb_user_username:
-    file: secrets/mongodb_user_username
   mongodb_user_password:
     file: secrets/mongodb_user_password
+  # Keycloak secrets
+  keycloak_db_password:
+    file: secrets/keycloak_db_password
+  keycloak_admin_password:
+    file: secrets/keycloak_admin_password
