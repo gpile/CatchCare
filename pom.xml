@@ -40,6 +40,7 @@
 		<spring-boot.version>3.2.5</spring-boot.version>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 		<catchcare-common.version>1.0.0</catchcare-common.version>
+        <testcontainers.version>1.21.3</testcontainers.version>
 
 		<!-- from spring-boot-starter-parent -->
 		<maven.compiler.release>${java.version}</maven.compiler.release>
@@ -71,6 +72,25 @@
 				<artifactId>catchcare-common</artifactId>
 				<version>${catchcare-common.version}</version>
 			</dependency>
+            <!-- Testcontainers for integration testing with MongoDB -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers</artifactId>
+                <version>${testcontainers.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${testcontainers.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>mongodb</artifactId>
+                <version>${testcontainers.version}</version>
+                <scope>test</scope>
+            </dependency>
 		</dependencies>
 	</dependencyManagement>
 
