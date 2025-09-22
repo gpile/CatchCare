@@ -16,7 +16,7 @@ public class JacksonConfig {
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper om = new ObjectMapper();
-        // Register the JavaTimeModule to handle Java 8 date/time types
+        // Register the JavaTimeModule to handle java.time.* data types (dependency jackson-datatype-jsr310)
         om.registerModule(new JavaTimeModule());
         return om;
     }
