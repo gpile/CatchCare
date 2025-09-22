@@ -1,8 +1,9 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: trap-iot-service
-#  server:
-#    port: 8080
 
   threads:
     virtual:
@@ -30,6 +31,3 @@ logging:
   level:
     root: INFO
 #    org.springframework.integration: DEBUG
-
-server:
-  port: 8081

@@ -43,6 +43,11 @@ public class TrapEventService {
     public void processEvent(String payload) {
         log.info("Processing payload on thread [" + Thread.currentThread() + "] with payload: " + payload);
 
+        if (payload == null || payload.isBlank()) {
+            log.warn("Received null or empty payload, skipping processing.");
+            return;
+        }
+
         try {
             // Deserialize the payload into a TrapMqttMessage object
             TrapMqttMessage message = objectMapper.readValue(payload, TrapMqttMessage.class);
@@ -51,11 +56,11 @@ public class TrapEventService {
 
                 case TrapStatusMqttMessage statusMessage -> {
                     // trap status changed
-                    log.info("Trap status changed: {}", statusMessage);
+                    log.info("Trap #{} status changed: {}", statusMessage.trapId(), statusMessage.closed()? "closed" : "open");
                     if (statusMessage.closed())
-                        trapKafkaProducer.sendEvent("trap-events", objectMapper.writeValueAsString(new TrapClosedEvent(statusMessage.trapId(), Instant.now())));
+                        trapKafkaProducer.sendEvent("trap-events", new TrapClosedEvent(statusMessage.trapId(), Instant.now()));
                     else
-                        trapKafkaProducer.sendEvent("trap-events", objectMapper.writeValueAsString(new TrapArmedEvent(statusMessage.trapId(), Instant.now())));
+                        trapKafkaProducer.sendEvent("trap-events", new TrapArmedEvent(statusMessage.trapId(), Instant.now()));
                 }
 
                 default -> log.warn("Unknown message type: {}", message.getClass());
