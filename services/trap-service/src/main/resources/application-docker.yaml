@@ -3,3 +3,10 @@ spring:
     name: trap-service-docker
   config:
     import: configtree:/run/secrets/ # Load secrets from Docker
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_HOST:http://localhost:8080}/realms/catchcare
+          jwk-set-uri: http://keycloak:8080/realms/catchcare/protocol/openid-connect/certs # Use Keycloak container hostname on Docker network

@@ -1,3 +1,6 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: trap-service
@@ -16,6 +19,13 @@ spring:
     # running with the Docker profile that could prevent the application from starting.
     # The correct application-docker.yaml configuration will then be loaded.
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_HOST:http://localhost:8080}/realms/catchcare
+          jwk-set-uri: http://keycloak:8080/realms/catchcare/protocol/openid-connect/certs # Use Keycloak container hostname on Docker network
+
   kafka:
     bootstrap-servers: ${KAFKA_BROKER_HOST:localhost}:${KAFKA_BROKER_PORT:9094}
     consumer:
@@ -32,6 +42,22 @@ spring:
       username: ${mongodb_user_username}
       password: ${mongodb_user_password}
 
+cors:
+  allowed-origins:
+    - "https://frontend.mydomain.com"
+    - "http://localhost:5173"
+    - "https://catchcare.localhost"
+  allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowed-headers:
+    - "*"
+  allow-credentials: true
+  max-age: 3600
+
 mqtt:
   url: tcp://${MQTT_BROKER_HOST:localhost}:${MQTT_BROKER_PORT:1883}
   client-id: trap-iot-client
@@ -43,8 +69,5 @@ mqtt:
 logging:
   level:
     root: INFO
-#    org.springframework.integration: DEBUG
+    org.springframework.security: DEBUG
     it.catchcare.trap.kafka: DEBUG
-
-server:
-  port: 8081
