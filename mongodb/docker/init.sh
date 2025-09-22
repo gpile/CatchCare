@@ -7,8 +7,8 @@
 # MongoDB image variables only create root user with access to the admin database.
 # If not executed, the microservices will not be able to connect to the MongoDB catchare database.
 
-# Read the username and password from Docker secrets
-MONGO_USER=$(cat /run/secrets/mongodb_user_username)
+# Read the password from Docker secrets
+# Username should be already defined as env variable
 MONGO_PASSWORD=$(cat /run/secrets/mongodb_user_password)
 
 # Run MongoDB commands for user and database creation
