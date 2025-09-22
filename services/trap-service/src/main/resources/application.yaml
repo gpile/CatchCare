@@ -39,7 +39,7 @@ spring:
       host: ${MONGODB_HOST:localhost}
       port: ${MONGODB_PORT:27017}
       database: catchcare
-      username: ${mongodb_user_username}
+      username: ${MONGO_USER_USERNAME}
       password: ${mongodb_user_password}
 
 cors:
