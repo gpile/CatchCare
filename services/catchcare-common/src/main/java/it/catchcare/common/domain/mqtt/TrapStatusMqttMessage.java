@@ -9,7 +9,11 @@ public record TrapStatusMqttMessage(String trapId, MqttMessageType type, boolean
             throw new IllegalArgumentException("type cannot be null");
         }
         if (MqttMessageType.STATUS != type) {
-            throw new IllegalArgumentException("type must be STATUS");
+            throw new IllegalArgumentException("type must be " + MqttMessageType.STATUS);
         }
+    }
+
+    public TrapStatusMqttMessage(String trapId, boolean closed) {
+        this(trapId, MqttMessageType.STATUS, closed);
     }
 }
