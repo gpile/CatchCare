@@ -30,18 +30,16 @@ public class TrapKafkaListener {
         try {
             // Deserialize the message to Trap object
             TrapEvent event = objectMapper.readValue(message, TrapEvent.class);
-//            log.debug("Deserialized Trap: {}", event);
 
+            // Event type handling using pattern matching
             switch (event){
                 case TrapClosedEvent trapClosedEvent -> {
                     log.info("Trap closed event: {}", trapClosedEvent);
-                    // Handle the trap closed event
-                    trapService.saveOrUpdate(new Trap(trapClosedEvent.trapId(), TrapStatus.CLOSED, null, trapClosedEvent.timestamp()));
+                    trapService.updateStatus(trapClosedEvent.trapId(), TrapStatus.CLOSED, trapClosedEvent.timestamp());
                 }
                 case TrapArmedEvent trapArmedEvent -> {
                     log.info("Trap armed event: {}", trapArmedEvent);
-                    // Handle the trap armed event
-                    trapService.saveOrUpdate(new Trap(trapArmedEvent.trapId(), TrapStatus.ARMED, null, trapArmedEvent.timestamp()));
+                    trapService.updateStatus(trapArmedEvent.trapId(), TrapStatus.ARMED, trapArmedEvent.timestamp());
                 }
                 default -> log.warn("Unknown event type: {}", event.getClass());
             }
