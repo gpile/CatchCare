@@ -21,30 +21,28 @@ public class TrapController {
     }
 
     @GetMapping({"", "/"})
-    public ResponseEntity<List<TrapDTO>> getAll() {
-        return ResponseEntity.ok(mapper.toDtoList(service.findAll()));
+    public List<TrapDTO> getAll() {
+        return mapper.toDtoList(service.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TrapDTO> getById(@PathVariable(name = "id") String id) {
-        return service.findById(id)
-                .map(mapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public TrapDTO getById(@PathVariable(name = "id") String id) {
+        return mapper.toDto(service.findById(id));
     }
 
     @PostMapping({"", "/"})
-    public ResponseEntity<TrapDTO> create(@RequestBody TrapDTO dto) {
-        return ResponseEntity.ok(mapper.toDto(service.create(mapper.toEntity(dto))));
+    public TrapDTO create(@RequestBody TrapDTO dto) {
+        return mapper.toDto(service.create(mapper.toEntity(dto)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TrapDTO> update(@PathVariable(name = "id") String id, @RequestBody TrapDTO dto) {
-        return service.update(id, mapper.toEntity(dto))
-                .map(mapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public TrapDTO update(@PathVariable(name = "id") String id, @RequestBody TrapDTO dto) {
+        return mapper.toDto(service.update(id, mapper.toEntity(dto)));
     }
 
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable(name = "id") String id) {
+        service.delete(id);
+    }
 
 }
