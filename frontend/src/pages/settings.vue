@@ -2,7 +2,9 @@
 </script>
 
 <template>
-  <VApp>
-    <RouterView />
-  </VApp>
+  <VRow>
+    <VCol cols="12">
+      
+    </VCol>
+  </VRow>
 </template>

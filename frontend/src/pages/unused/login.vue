@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { useTheme } from 'vuetify'
+import { login as authLogin } from '@/services/auth-service'
 import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
+import { useTheme } from 'vuetify'
 
 import logo from '@images/logo.svg?raw'
 import authV1MaskDark from '@images/pages/auth-v1-mask-dark.png'
@@ -17,12 +18,30 @@ const form = ref({
 const vuetifyTheme = useTheme()
 
 const authThemeMask = computed(() => {
-  return vuetifyTheme.global.name.value === 'light'
-    ? authV1MaskLight
-    : authV1MaskDark
+  return vuetifyTheme.global.name.value === 'light' ? authV1MaskLight : authV1MaskDark
 })
 
 const isPasswordVisible = ref(false)
+
+const router = useRouter()
+const route = useRoute()
+
+const isSubmitting = ref(false)
+const errorMessage = ref('')
+
+async function submitLogin() {
+  errorMessage.value = ''
+  isSubmitting.value = true
+  try {
+    await authLogin(form.value.email, form.value.password, form.value.remember)
+    const redirect = (route.query.redirect as string) || '/traps'
+    router.replace(redirect)
+  } catch (err: any) {
+    errorMessage.value = err?.response?.data?.message || err?.message || 'Login fallito'
+  } finally {
+    isSubmitting.value = false
+  }
+}
 </script>
 
 <template>
@@ -43,25 +62,19 @@ const isPasswordVisible = ref(false)
             class="d-flex"
             v-html="logo"
           />
-          <h2 class="font-weight-medium text-2xl text-uppercase">
-            Materio
-          </h2>
+          <h2 class="font-weight-medium text-2xl text-uppercase">Materio</h2>
         </RouterLink>
       </VCardItem>
 
       <VCardText class="pt-2">
-        <h4 class="text-h4 mb-1">
-          Welcome to Materio! 👋🏻
-        </h4>
-        <p class="mb-0">
-          Please sign-in to your account and start the adventure
-        </p>
+        <h4 class="text-h4 mb-1">Welcome to Materio! 👋🏻</h4>
+        <p class="mb-0">Please sign-in to your account and start the adventure</p>
       </VCardText>
 
       <VCardText>
-        <VForm @submit.prevent="() => {}">
+        <VForm @submit.prevent="submitLogin">
           <VRow>
-            <!-- email -->
+            <!-- username -->
             <VCol cols="12">
               <VTextField
                 v-model="form.email"
@@ -101,10 +114,16 @@ const isPasswordVisible = ref(false)
               <VBtn
                 block
                 type="submit"
-                to="/"
+                :loading="isSubmitting"
               >
                 Login
               </VBtn>
+              <div
+                v-if="errorMessage"
+                class="text-error mt-3"
+              >
+                {{ errorMessage }}
+              </div>
             </VCol>
 
             <!-- create account -->
@@ -163,5 +182,5 @@ const isPasswordVisible = ref(false)
 </template>
 
 <style lang="scss">
-@use "@core/scss/template/pages/page-auth";
+@use '@core/scss/template/pages/page-auth';
 </style>
